@@ -16,13 +16,33 @@ class UserModel extends BaseModel {
     /**
      * Find one user
      */
-    async findUser(id) {
+    async findOneUser(id) {
 
         const user = await this.QueryBuilder.select('*')
             .from('users')
             .where('id', id)
             .first();
         
+        return user;
+    }
+
+    /**
+     * Find one by username
+     */
+    async findOneByUsername(username, whereClause = []) {
+
+        let user = this.QueryBuilder.select('*')
+            .from('users')
+            .where('username', username);
+
+        if (whereClause.length > 0) {
+            for (const item of whereClause) {
+                user = user.where(item?.field, item.value);
+            }
+        }
+
+        user = await user.first();
+
         return user;
     }
 
@@ -42,7 +62,7 @@ class UserModel extends BaseModel {
             logintype: 'LOCAL'
         }).into('users');
 
-        return this.findUser(newUser[0]);
+        return this.findOneUser(newUser[0]);
     }
 
     /**

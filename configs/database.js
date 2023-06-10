@@ -10,10 +10,10 @@ exports.databaseConfig = {
         password: String(process.env.DB_PASSWORD ?? ''),
         database: String(process.env.DB_DATABASE ?? 'test'),
     },
-    // migrations: {
-    //     directory: './database/migrations'
-    // },
-    // seeds: {
-    //     directory: './database/seeds',
-    // },
+    migrations: {
+        directory: './database/migrations'
+    },
+    seeds: {
+        directory: './database/seeds',
+    },
 }

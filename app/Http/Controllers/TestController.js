@@ -4,7 +4,7 @@ class TestController {
 
     static async index (request, response) {
 
-        const data = TestModel.sayHello();
+        const data = await TestModel.getUsers();
 
         return response.status(200)
             .send({

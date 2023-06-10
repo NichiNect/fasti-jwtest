@@ -10,6 +10,7 @@ module.exports = async (app) => {
 
     // * Auth
     app.post('/auth/login', AuthController.login);
+    app.post('/auth/register', AuthController.register);
 
     // * User
     app.get('/users', { preValidation: [Auth] }, UserController.index);

@@ -6,7 +6,7 @@ dotenv.config();
 
 class AuthController {
 
-    static async login (request, response) {
+    static async login(request, response) {
 
         const bodyParams = request.body;
 
@@ -35,12 +35,10 @@ class AuthController {
         const checkPassword = await bcrypt.compare(bodyParams.password, checkUser.password);
 
         if (!checkPassword) {
-            if (!checkUser) {
-                return response.status(401)
-                    .send({
-                        message: 'This password is wrong'
-                    });
-            }
+            return response.status(401)
+                .send({
+                    message: 'This password is wrong'
+                });
         }
 
         // * Prepare token
@@ -56,6 +54,55 @@ class AuthController {
             .send({
                 message: 'Success',
                 token
+            });
+    }
+
+    static async register(request, response) {
+
+        const bodyParams = request.body;
+
+        if (!bodyParams?.username && !bodyParams?.password && !bodyParams?.name && !bodyParams?.email) {
+            return response.status(422)
+                .send({
+                    message: 'Validation error: Username, name, email, and password must required'
+                });
+        }
+
+        // * Check unique username & email
+        const userUsername = await UserModel.QueryBuilder.from('users')
+            .select('*')
+            .where('username', bodyParams?.username)
+            .first();
+
+        if (userUsername) {
+            return response.status(422).send({
+                message: 'Validation error: username already used'
+            });
+        }
+
+        const userEmail = await UserModel.QueryBuilder.from('users')
+            .select('*')
+            .where('email', bodyParams?.email)
+            .first();
+
+        if (userEmail) {
+            return response.status(422).send({
+                message: 'Validation error: email already used'
+            });
+        }
+
+        // * Insert new user
+        const user = await UserModel.createUser({
+            username: bodyParams?.username,
+            name: bodyParams?.name,
+            email: bodyParams?.email,
+            password: bodyParams?.password,
+        });
+
+        return response.status(200)
+            .send({
+                message: 'Success',
+                data: user
             });
     }
 }

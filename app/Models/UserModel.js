@@ -51,7 +51,7 @@ class UserModel extends BaseModel {
      */
     async createUser(data) {
 
-        const salt = bcrypt.getSalt(10);
+        const salt = bcrypt.genSaltSync(10);
         const passwordHash = bcrypt.hashSync(data.password, salt);
 
         const newUser = await this.QueryBuilder.insert({
@@ -59,7 +59,7 @@ class UserModel extends BaseModel {
             name: data.name,
             email: data.email,
             password: passwordHash,
-            logintype: 'LOCAL'
+            logintype: data.logintype ?? 'LOCAL'
         }).into('users');
 
         return this.findOneUser(newUser[0]);
@@ -88,12 +88,11 @@ class UserModel extends BaseModel {
 
                 if (data.password) {
 
-                    const salt = bcrypt.getSalt(10);
+                    const salt = bcrypt.genSaltSync(10);
                     const passwordHash = bcrypt.hashSync(data.password, salt);
                     updateData['password'] = passwordHash;
                 }
             }
-
         }
 
         if (Object.keys(updateData).length > 0) {

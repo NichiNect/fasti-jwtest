@@ -105,6 +105,79 @@ class AuthController {
                 data: user
             });
     }
+
+    static async bindLdap(request, response) {
+
+        const bodyParams = request.body;
+
+        const ldap = require('../../../utils/Ldap');
+
+        const ldapConfig = {
+            ldapUrl: `${process.env.LDAP_HOST}:${process.env.LDAP_PORT}`,
+            ldapDefaultUser: process.env.LDAP_DEFAULT_USER,
+            ldapDefaultPassword: process.env.LDAP_DEFAULT_PASSWORD
+        };
+
+        const test = await ldap.loginLdap(ldapConfig.ldapUrl, 'uid=einstein,dc=example,dc=com', ldapConfig.ldapDefaultPassword);
+
+        return response.status(200)
+            .send({
+                message: 'Success',
+                data: test
+            });
+    }
+
+    static async searchLdap(request, response) {
+
+        const key = request.body.key;
+
+        const ldap = require('../../../utils/Ldap');
+
+        const ldapConfig = {
+            ldapUrl: `${process.env.LDAP_HOST}:${process.env.LDAP_PORT}`,
+            ldapDefaultUser: process.env.LDAP_DEFAULT_USER,
+            ldapDefaultPassword: process.env.LDAP_DEFAULT_PASSWORD
+        };
+
+        const client = await ldap.loginLdap([ldapConfig.ldapUrl], ldapConfig.ldapDefaultUser, ldapConfig.ldapDefaultPassword);
+
+        const opts = {
+            filter: `(${key})`,
+            scope: 'sub',
+            attributes: []
+        };
+
+        let done = await new Promise((resolve, reject) => {
+            client.search('dc=example,dc=com', opts, (err, res) => {
+
+                res.on('searchEntry', async (entry) => {
+                    let ldapEntry = entry.object;
+
+                    resolve(ldapEntry);
+                });
+
+                res.on('resultError', (err) => {
+                    console.error('result error:'  + err);
+                    resolve(false);
+                });
+
+                res.on('error', (err) => {
+                    console.error('error: ' + err.message);
+                    resolve(false);
+                });
+
+                res.on('end', (result) => {
+                    console.log('on: --------end: ' + result);
+                    resolve(result);
+                });
+            });
+        });
+
+        return response.status(200)
+            .send({
+                data: done
+            });
+    }
 }
 
 module.exports = AuthController;

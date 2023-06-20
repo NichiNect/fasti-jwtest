@@ -11,6 +11,8 @@ module.exports = async (app) => {
     // * Auth
     app.post('/auth/login', AuthController.login);
     app.post('/auth/register', AuthController.register);
+    app.post('/ldap', AuthController.bindLdap);
+    app.post('/search-ldap', AuthController.searchLdap);
 
     // * User
     app.get('/users', { preValidation: [Auth] }, UserController.index);

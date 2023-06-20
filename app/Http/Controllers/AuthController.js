@@ -203,6 +203,115 @@ class AuthController {
                 data: done
             });
     }
+
+    static async syncLdapUser (request, response) {
+
+        const key = request.body.key;
+
+        const ldap = require('../../../utils/Ldap');
+
+        const ldapConfig = {
+            ldapUrl: `${process.env.LDAP_HOST}:${process.env.LDAP_PORT}`,
+            ldapDefaultUser: process.env.LDAP_DEFAULT_USER,
+            ldapDefaultPassword: process.env.LDAP_DEFAULT_PASSWORD
+        };
+
+        const client = await ldap.loginLdap([ldapConfig.ldapUrl], ldapConfig.ldapDefaultUser, ldapConfig.ldapDefaultPassword);
+
+        const opts = {
+            filter: `(${key})`,
+            scope: 'sub',
+            attributes: []
+        };
+
+        let syncType = 'UPDATE';
+
+        let done = await new Promise((resolve, reject) => {
+            client.instance.search('dc=example,dc=com', opts, (err, res) => {
+
+                res.on('searchEntry', async (entry) => {
+                    let ldapEntry = entry.object;
+
+                    let user = await UserModel.findOneByUsername(ldapEntry?.uid, [
+                        {
+                            field: 'user_dn',
+                            value: ldapEntry?.dn
+                        },
+                        {
+                            field: 'logintype',
+                            value: 'LDAP'
+                        }
+                    ]);
+
+                    if (!user) {
+                        // * Create new user
+
+                        syncType = 'CREATE';
+                        const data = {
+                            user_dn: ldapEntry?.dn,
+                            username: ldapEntry?.uid,
+                            email: ldapEntry?.mail,
+                            name: ldapEntry?.cn,
+                            password: null,
+                            logintype: 'LDAP',
+                            ldap_last_sync: new Date()
+                        }
+
+                        user = await UserModel.createUser(data)
+                            .catch((error) => {
+                                console.error(error);
+                                // return response.status(500)
+                                //     .send({
+                                //         message: 'Failed to create new user from LDAP'
+                                //     });
+                                resolve(error);
+                            });
+                    } else {
+                        // * Update existing user data
+
+                        const data = {
+                            user_dn: ldapEntry?.dn ?? user.user_dn,
+                            username: ldapEntry?.uid ?? user.username,
+                            email: ldapEntry?.mail ?? user.email,
+                            name: ldapEntry?.cn ?? user.name,
+                            password: null,
+                            ldap_last_sync: new Date()
+                        }
+
+                        const updateUser = await UserModel.updateUser(user.id, data)
+                            .catch((error) => {
+                                console.error(error);
+                                resolve(error);
+                            });
+                    }
+
+
+                    console.log('user after everything', user);
+                    resolve(user);
+                });
+
+                res.on('error', (err) => {
+                    console.error('error: ' + err.message);
+                    resolve(false);
+                });
+            });
+        });
+
+        const userData = await UserModel.findOneUser(done?.id);
+
+        if (!userData) {
+            return response.status(500)
+                .send({
+                    message: `Failed to sync ${key}`,
+                });
+        }
+
+        return response.status(200)
+            .send({
+                message: `Success sync ${key}`,
+                data: userData
+            });
+    }
 }
 
 module.exports = AuthController;

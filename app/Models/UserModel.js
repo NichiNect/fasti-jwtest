@@ -52,13 +52,14 @@ class UserModel extends BaseModel {
     async createUser(data) {
 
         const salt = bcrypt.genSaltSync(10);
-        const passwordHash = bcrypt.hashSync(data.password, salt);
+        const passwordHash = bcrypt.hashSync(data.password ?? '', salt);
 
         const newUser = await this.QueryBuilder.insert({
+            user_dn: data?.user_dn,
             username: data.username,
             name: data.name,
             email: data.email,
-            password: passwordHash,
+            password: (data?.logintype == 'LDAP') ? null : passwordHash,
             logintype: data.logintype ?? 'LOCAL'
         }).into('users');
 
@@ -71,10 +72,13 @@ class UserModel extends BaseModel {
     async updateUser(id, data) {
 
         let updateableFieldMapping = {
+            user_dn: 'user_dn',
             username: 'username',
             name: 'name',
             email: 'email',
             password: 'password',
+            logintype: 'logintype',
+            ldap_last_sync: 'ldap_last_sync'
         };
 
         let updateData = {};

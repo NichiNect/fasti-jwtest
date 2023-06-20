@@ -11,6 +11,7 @@ exports.up = function(knex) {
         table.string('email').notNullable().unique();
         table.text('password');
         table.string('logintype', 10);
+        table.timestamp('ldap_last_sync');
         table.timestamps(true, true);
     });
 };

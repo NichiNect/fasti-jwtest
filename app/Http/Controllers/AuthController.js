@@ -17,12 +17,7 @@ class AuthController {
                 });
         }
 
-        const checkUser = await UserModel.findOneByUsername(bodyParams.username, [
-            {
-                field: 'logintype',
-                value: 'LOCAL'
-            }
-        ]);
+        const checkUser = await UserModel.findOneByUsername(bodyParams.username);
 
         if (!checkUser) {
             return response.status(401)
@@ -31,14 +26,44 @@ class AuthController {
                 });
         }
 
-        // * Check password
-        const checkPassword = await bcrypt.compare(bodyParams.password, checkUser.password);
+        switch (checkUser?.logintype) {
+            case 'LDAP': {
 
-        if (!checkPassword) {
-            return response.status(401)
-                .send({
-                    message: 'This password is wrong'
-                });
+                // * Check to LDAP Server
+                const ldap = require('../../../utils/Ldap');
+
+                const ldapConfig = {
+                    ldapUrl: `${process.env.LDAP_HOST}:${process.env.LDAP_PORT}`,
+                    ldapDefaultUser: process.env.LDAP_DEFAULT_USER,
+                    ldapDefaultPassword: process.env.LDAP_DEFAULT_PASSWORD
+                };
+
+                const ldapClient = await ldap.loginLdap(ldapConfig.ldapUrl, checkUser?.user_dn, bodyParams?.password);
+
+                if (ldapClient?.success == false) {
+                    return response.status(401)
+                        .send({
+                            message: 'Failed to check LDAP Server',
+                            errors: [
+                                ldapClient?.message
+                            ]
+                        });
+                }
+            } break;
+            case 'LOCAL': {
+                
+                // * Check password
+                const checkPassword = await bcrypt.compare(bodyParams.password, checkUser.password);
+
+                if (!checkPassword) {
+                    return response.status(401)
+                        .send({
+                            message: 'This password is wrong'
+                        });
+                }
+            } break;
+            default: {
+            }
         }
 
         // * Prepare token
@@ -148,7 +173,7 @@ class AuthController {
         };
 
         let done = await new Promise((resolve, reject) => {
-            client.search('dc=example,dc=com', opts, (err, res) => {
+            client.instance.search('dc=example,dc=com', opts, (err, res) => {
 
                 res.on('searchEntry', async (entry) => {
                     let ldapEntry = entry.object;

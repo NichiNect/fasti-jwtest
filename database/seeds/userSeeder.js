@@ -27,10 +27,18 @@ exports.seed = async function(knex) {
       logintype: 'LOCAL'
     },
     {
-      user_dn: 'uid=riemann',
+      user_dn: 'uid=riemann,dc=example,dc=com',
       username: 'riemann',
       name: 'Bernhard Riemann',
       email: 'riemann@ldap.forumsys.com',
+      // password: bcrypt.hashSync('thispassword', salt),
+      logintype: 'LDAP'
+    },
+    {
+      user_dn: 'uid=einstein,dc=example,dc=com',
+      username: 'einstein',
+      name: 'Albert Einstein',
+      email: 'einstein@ldap.forumsys.com',
       // password: bcrypt.hashSync('thispassword', salt),
       logintype: 'LDAP'
     },

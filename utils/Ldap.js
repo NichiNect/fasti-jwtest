@@ -19,10 +19,16 @@ class Ldap extends BaseModel {
             client.bind(`${username}`, (password ?? ''), (err, res) => {
                 if (err) {
                     console.log(err);
-                    resolve(err?.lde_message);
+                    resolve({
+                        success: false,
+                        message: err?.lde_message
+                    });
                 }
 
-                resolve(client);
+                resolve({
+                    success: true,
+                    instance: client
+                });
             });
         });
     }

@@ -1,0 +1,181 @@
+{
+	"info": {
+		"_postman_id": "ac63ae5d-6021-4407-8413-0700bf827173",
+		"name": "Fasti-JWTest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24190139"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"riemann\",\n    \"password\": \"password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3400/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3400",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"user 4\",\n    \"username\": \"user4\",\n    \"password\": \"lupa\",\n    \"email\": \"user4@mail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3400/auth/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3400",
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bind LDAP",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3400/ldap",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3400",
+					"path": [
+						"ldap"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search LDAP by Identifier",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"key\": \"uid=newton\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3400/search-ldap",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3400",
+					"path": [
+						"search-ldap"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sync User Data to LDAP",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"key\": \"uid=tesla\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3400/sync-ldap-user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3400",
+					"path": [
+						"sync-ldap-user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find All Users",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ1c2VyMSIsImxvZ2ludHlwZSI6IkxPQ0FMIiwiaWF0IjoxNjg2Mzg2OTk1LCJleHAiOjE2ODY0NzMzOTV9.ZQjd3g1FzB0ZIDV48iN-L1AcWHhkQzP8QfcYvFBny8A",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3400/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3400",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
